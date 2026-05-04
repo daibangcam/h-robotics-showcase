@@ -1,0 +1,530 @@
+C51 COMPILER V9.01   MACH_DEN_GIAO_THONG_DS1307_AT89S52                                    09/14/2021 23:55:10 PAGE 1   
+
+
+C51 COMPILER V9.01, COMPILATION OF MODULE MACH_DEN_GIAO_THONG_DS1307_AT89S52
+OBJECT MODULE PLACED IN Mach_den_giao_thong_DS1307_At89s52.OBJ
+COMPILER INVOKED BY: C:\Keil\C51\BIN\C51.EXE Mach_den_giao_thong_DS1307_At89s52.c BROWSE DEBUG OBJECTEXTEND
+
+line level    source
+
+   1          #include <AT89X52.H>
+   2          #include <tv_delay.c>
+   3          #include <tv_ds13b07.c>  
+   4          
+   5          const unsigned char ma7doan[]= {0xC0,0xF9,0xA4,0xB0,0x99,0x92,0x82,0xF8,0x80,0x90};
+   6          
+   7          #define   xp       P3_7
+   8          #define   vp       P3_6
+   9          #define   dp       P2_3
+  10          
+  11          #define   xt       P2_2
+  12          #define   vt       P2_1
+  13          #define   dt       P2_0
+  14          
+  15          #define   tang      P3_3
+  16          #define   giam      P3_5
+  17          #define   mod       P3_4
+  18          
+  19          
+  20          signed char  bdn,tt_mod;
+  21          signed char   dotrai,xanhtrai,vangtrai;    //signed kieu co dau, int8 8 bit
+  22          signed char  dophai,xanhphai,vangphai;
+  23          signed char  ghdo,ghxanh,ghvang;     //gioi han
+  24          
+  25          signed char ttt,ttp;      //ttt: trang thai trai
+  26          signed char led0,led1,led2,led3;     //
+  27          bit             tt_dv,tt1,tt2,tt3,tt4,tt5;
+  28          
+  29          void timer0_interrupt()interrupt 1                                                      // ngat timer 0. timer0 16bit
+  30          {                          // ngat say ra duoc 50ms      thi bdn tang 1 don vi
+  31   1         bdn++;
+  32   1         TL0=0xb0;
+  33   1         TH0=0x3c;
+  34   1      }
+  35          
+  36          void hienthi()
+  37          {
+  38   1        P0 = led0;   P2_7=0;          delay_ms();     P2_7=1;
+  39   1        P0 = led1;   P2_6=0;          delay_ms();     P2_6=1;
+  40   1        P0 = led2;   P2_5=0;          delay_ms();     P2_5=1;
+  41   1        P0 = led3;   P2_4=0;          delay_ms();     P2_4=1;  
+  42   1      }
+  43          
+  44          void dem_ben_trai()
+  45          {
+  46   1         if(ttt==0)     // cho phep dem den xanh
+  47   1         {
+  48   2            if(xanhtrai>0)          // kiem tra co nho hon khong chua  
+  49   2            {                       // neu chua
+  50   3               xanhtrai--;
+  51   3               led0 = ma7doan[xanhtrai/10];                   // 15/10 = 1 du 5 lay nguyen
+  52   3               led1 = ma7doan[xanhtrai%10];              // lay du =5
+  53   3               dt=1;
+  54   3               vt=1;
+  55   3               xt=0;                          // led sang
+C51 COMPILER V9.01   MACH_DEN_GIAO_THONG_DS1307_AT89S52                                    09/14/2021 23:55:10 PAGE 2   
+
+  56   3            }
+  57   2            else        // 0
+  58   2            {
+  59   3               xanhtrai=ghxanh;
+  60   3               vangtrai=ghvang;
+  61   3               led0 = ma7doan[vangtrai/10];
+  62   3               led1 = ma7doan[vangtrai%10];
+  63   3               dt=1;
+  64   3               vt=0;
+  65   3               xt=1;  
+  66   3               ttt=1;
+  67   3            }
+  68   2         }
+  69   1         else if(ttt==1)
+  70   1         {
+  71   2            if(vangtrai>0)
+  72   2            {
+  73   3               vangtrai--;
+  74   3               led0 = ma7doan[vangtrai/10];
+  75   3               led1 = ma7doan[vangtrai%10];
+  76   3               dt=1;
+  77   3               vt=0;
+  78   3               xt=1;    
+  79   3            }
+  80   2            else
+  81   2            {
+  82   3               vangtrai=ghvang;
+  83   3               dotrai=ghdo;
+  84   3               led0 = ma7doan[dotrai/10];
+  85   3               led1 = ma7doan[dotrai%10];
+  86   3               dt=0;
+  87   3               vt=1;
+  88   3               xt=1;  
+  89   3               ttt=2;
+  90   3            }
+  91   2         }
+  92   1         else if(ttt==2)
+  93   1         {
+  94   2            if(dotrai>0)
+  95   2            {
+  96   3               dotrai--;
+  97   3               led0 = ma7doan[dotrai/10];
+  98   3               led1 = ma7doan[dotrai%10];
+  99   3               dt=0;
+ 100   3               vt=1;
+ 101   3               xt=1;
+ 102   3            }
+ 103   2            else
+ 104   2            {
+ 105   3               dotrai=ghdo;
+ 106   3               xanhtrai=ghxanh;
+ 107   3               led0 = ma7doan[xanhtrai/10];
+ 108   3               led1 = ma7doan[xanhtrai%10];
+ 109   3               dt=1;
+ 110   3               vt=1;
+ 111   3               xt=0;
+ 112   3               ttt=0;
+ 113   3            }
+ 114   2         }
+ 115   1      }
+ 116          
+ 117          void dem_ben_phai()
+C51 COMPILER V9.01   MACH_DEN_GIAO_THONG_DS1307_AT89S52                                    09/14/2021 23:55:10 PAGE 3   
+
+ 118          {
+ 119   1         if(ttp==0)
+ 120   1         {               
+ 121   2            if(dophai>0)      
+ 122   2            {
+ 123   3               dophai--;
+ 124   3               led2 = ma7doan[dophai/10];
+ 125   3               led3 = ma7doan[dophai%10];
+ 126   3               dp=0;
+ 127   3               vp=1;
+ 128   3               xp=1;
+ 129   3            }
+ 130   2            else
+ 131   2            {
+ 132   3               dophai=ghdo;
+ 133   3               xanhphai=ghxanh;
+ 134   3               led2 = ma7doan[xanhphai/10];
+ 135   3               led3 = ma7doan[xanhphai%10];
+ 136   3               dp=1;
+ 137   3               vp=1;
+ 138   3               xp=0;  
+ 139   3               ttp=1;
+ 140   3            }
+ 141   2         }
+ 142   1         else if(ttp==1)
+ 143   1         {
+ 144   2            if(xanhphai>0)
+ 145   2            {
+ 146   3               xanhphai--;
+ 147   3               led2 = ma7doan[xanhphai/10];
+ 148   3               led3 = ma7doan[xanhphai%10];
+ 149   3               dp=1;
+ 150   3               vp=1;
+ 151   3               xp=0;   
+ 152   3            }
+ 153   2            else
+ 154   2            {
+ 155   3               xanhphai=ghxanh;
+ 156   3               vangphai=ghvang;
+ 157   3               led2 = ma7doan[vangphai/10];
+ 158   3               led3 = ma7doan[vangphai%10];
+ 159   3               dp=1;
+ 160   3               vp=0;
+ 161   3               xp=1;
+ 162   3               ttp=2;
+ 163   3            }
+ 164   2         }
+ 165   1         else if(ttp==2)
+ 166   1         {
+ 167   2            if(vangphai>0)
+ 168   2            {
+ 169   3               vangphai--;
+ 170   3               led2 = ma7doan[vangphai/10];
+ 171   3               led3 = ma7doan[vangphai%10];
+ 172   3               dp=1;
+ 173   3               vp=0;
+ 174   3               xp=1;
+ 175   3            }
+ 176   2            else
+ 177   2            {
+ 178   3               vangphai=ghvang;
+ 179   3               dophai=ghdo;
+C51 COMPILER V9.01   MACH_DEN_GIAO_THONG_DS1307_AT89S52                                    09/14/2021 23:55:10 PAGE 4   
+
+ 180   3               led2 = ma7doan[dophai/10];
+ 181   3               led3 = ma7doan[dophai%10];
+ 182   3               dp=0;
+ 183   3               vp=1;
+ 184   3               xp=1;
+ 185   3               ttp=0;
+ 186   3            }
+ 187   2         }
+ 188   1      }
+ 189          
+ 190          
+ 191          //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ 192          void phim_mod()
+ 193          {
+ 194   1         if(mod==0)               // co nhan phim,
+ 195   1         {
+ 196   2            hienthi();              
+ 197   2            if(mod==0)               // con nhan phim
+ 198   2            {
+ 199   3                       tt_mod++;             // tang gia tri
+ 200   3               if(tt_mod>3)      tt_mod=0;            // gio, phut, giay      
+ 201   3               while(mod==0)         // cho nha phim
+ 202   3                       {
+ 203   4                              hienthi();
+ 204   4                       }
+ 205   3            }
+ 206   2         }
+ 207   1      }
+ 208          
+ 209          void phim_tang()
+ 210          {
+ 211   1         if(tang==0)
+ 212   1         {
+ 213   2            hienthi();              
+ 214   2            if(tang==0)
+ 215   2            {                                         
+ 216   3                      if(tt_mod==1)           // phu thuoc vao bien tt_mod o tren
+ 217   3                      {
+ 218   4                        gio++;
+ 219   4                        if(gio>23)      gio=0;
+ 220   4                        write_to_ds13();
+ 221   4                      }
+ 222   3                      else if(tt_mod==2)
+ 223   3                      {
+ 224   4                        phut++;
+ 225   4                        if(phut>59)      phut=0;
+ 226   4                        write_to_ds13();            // ghi vao con ds1307
+ 227   4                      }
+ 228   3                      else if(tt_mod==3)
+ 229   3                      {
+ 230   4                        giay++;
+ 231   4                        if(giay>59)      giay=0;
+ 232   4                        write_to_ds13();            // ghi vao con ds1307
+ 233   4                      }
+ 234   3                      while(tang==0)
+ 235   3                      {
+ 236   4                              hienthi();
+ 237   4                      }       
+ 238   3              }
+ 239   2        }
+ 240   1      }
+ 241          
+C51 COMPILER V9.01   MACH_DEN_GIAO_THONG_DS1307_AT89S52                                    09/14/2021 23:55:10 PAGE 5   
+
+ 242          //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ 243          void phim_giam()
+ 244          {
+ 245   1         if(giam==0)
+ 246   1         {
+ 247   2            hienthi();              
+ 248   2            if(giam==0)
+ 249   2            {
+ 250   3                      if(tt_mod==1)
+ 251   3                      {
+ 252   4                        gio--;
+ 253   4                        if(gio<0)      gio=23;
+ 254   4                        write_to_ds13();
+ 255   4                      }
+ 256   3                      else if(tt_mod==2)
+ 257   3                      {
+ 258   4                        phut--;
+ 259   4                       if(phut<0)      phut=59;
+ 260   4                       write_to_ds13();
+ 261   4                      }
+ 262   3                      else if(tt_mod==3)
+ 263   3                      {
+ 264   4                        giay--;
+ 265   4                       if(giay<0)      giay=59;
+ 266   4                       write_to_ds13();
+ 267   4                      }
+ 268   3                      while(giam==0)
+ 269   3                      {
+ 270   4                              hienthi();
+ 271   4                      }
+ 272   3                }
+ 273   2         }
+ 274   1      }
+ 275          
+ 276          void giaima_thoigian()
+ 277          {
+ 278   1              dp=1;
+ 279   1              vp=1;
+ 280   1              xp=1;
+ 281   1              
+ 282   1              dt=1;
+ 283   1              vt=1;
+ 284   1              xt=1;
+ 285   1      
+ 286   1              if(bdn<10)
+ 287   1              {
+ 288   2                      if(tt_mod==1)   
+ 289   2                      {
+ 290   3                              led0=0xff;                      // tat vi tri led 0 va 1
+ 291   3                              led1=0xff;
+ 292   3                      }
+ 293   2                      else if(tt_mod==2)      
+ 294   2                      {
+ 295   3                              led2=0xff;
+ 296   3                              led3=0xff;
+ 297   3                      }
+ 298   2                      else if(tt_mod==3)
+ 299   2                      {
+ 300   3                              led0=0xff;
+ 301   3                              led1=0xff;
+ 302   3                              led2=0xff;
+ 303   3                              led3=0xff;              
+C51 COMPILER V9.01   MACH_DEN_GIAO_THONG_DS1307_AT89S52                                    09/14/2021 23:55:10 PAGE 6   
+
+ 304   3                      }       
+ 305   2              }
+ 306   1              else
+ 307   1              {
+ 308   2                      if(tt_mod==1)   
+ 309   2                      {
+ 310   3                              led0=ma7doan[gio/10];
+ 311   3                              led1=ma7doan[gio%10];
+ 312   3                      }
+ 313   2                      else if(tt_mod==2)      
+ 314   2                      {
+ 315   3                              led2=ma7doan[phut/10];
+ 316   3                              led3=ma7doan[phut%10];
+ 317   3                      }
+ 318   2                      else if(tt_mod==3)
+ 319   2                      {
+ 320   3                              led0=ma7doan[giay/10];
+ 321   3                              led1=ma7doan[giay%10];
+ 322   3                              led2=ma7doan[giay/10];
+ 323   3                              led3=ma7doan[giay%10];          
+ 324   3                      }
+ 325   2              }       
+ 326   1      }
+ 327          
+ 328          void nhay_den_vang()
+ 329          {
+ 330   1              led0=0xff;
+ 331   1              led1=0xff;
+ 332   1              led2=0xff;
+ 333   1              led3=0xff;
+ 334   1              if(bdn<10)
+ 335   1              {
+ 336   2                      dp=1;
+ 337   2                      vp=0;           // bat den vang nua giay dau
+ 338   2                      xp=1;
+ 339   2              
+ 340   2                      dt=1;
+ 341   2                      vt=0;
+ 342   2                      xt=1;   
+ 343   2              }
+ 344   1              else                            // nua giay sau tat den vang
+ 345   1              {
+ 346   2                      dp=1;
+ 347   2                      vp=1;
+ 348   2                      xp=1;
+ 349   2              
+ 350   2                      dt=1;
+ 351   2                      vt=1;
+ 352   2                      xt=1;   
+ 353   2              }
+ 354   1      }
+ 355          
+ 356          void kiem_tra()
+ 357          {
+ 358   1              if(gio<5)
+ 359   1              {
+ 360   2                      tt_dv=0;                                // bat den vang
+ 361   2                      tt1=tt2=tt3=tt4=tt5=1;
+ 362   2              }
+ 363   1              else if(gio<7)    //(5 - 7)
+ 364   1              {
+ 365   2                      tt2=tt3=tt4=tt5=1;
+C51 COMPILER V9.01   MACH_DEN_GIAO_THONG_DS1307_AT89S52                                    09/14/2021 23:55:10 PAGE 7   
+
+ 366   2                      tt_dv=1;
+ 367   2                      if(tt1==1)
+ 368   2                      {
+ 369   3                              tt1=0;
+ 370   3                              ttt=0;
+ 371   3                              ttp=0;
+ 372   3                              ghdo=20;      ghxanh=16;        ghvang=3;
+ 373   3                              dotrai=ghdo;  xanhtrai=ghxanh;   vangtrai=ghvang;
+ 374   3                              dophai=ghdo;  xanhphai=ghxanh;   vangphai=ghvang;
+ 375   3                      }       
+ 376   2              }
+ 377   1              else if(gio<9)
+ 378   1              {
+ 379   2                      tt1=tt3=tt4=tt5=1;
+ 380   2                      tt_dv=1;
+ 381   2                      if(tt2==1)
+ 382   2                      {
+ 383   3                              tt2=0;
+ 384   3                              ttt=0;
+ 385   3                              ttp=0;
+ 386   3                              ghdo=40;      ghxanh=36;        ghvang=3;
+ 387   3                              dotrai=ghdo;  xanhtrai=ghxanh;   vangtrai=ghvang;
+ 388   3                              dophai=ghdo;  xanhphai=ghxanh;   vangphai=ghvang;
+ 389   3                      }       
+ 390   2              }
+ 391   1              else if(gio<17)
+ 392   1              {
+ 393   2                      tt1=tt2=tt4=tt5=1;
+ 394   2                      tt_dv=1;
+ 395   2                      if(tt3==1)
+ 396   2                      {
+ 397   3                              tt3=0;
+ 398   3                              ttt=0;
+ 399   3                              ttp=0;
+ 400   3                              ghdo=20;      ghxanh=16;        ghvang=3;
+ 401   3                              dotrai=ghdo;  xanhtrai=ghxanh;   vangtrai=ghvang;
+ 402   3                              dophai=ghdo;  xanhphai=ghxanh;   vangphai=ghvang;
+ 403   3                      }       
+ 404   2              }
+ 405   1              else if(gio<20)
+ 406   1              {
+ 407   2                      tt1=tt2=tt3=tt5=1;
+ 408   2                      tt_dv=1;
+ 409   2                      if(tt4==1)
+ 410   2                      {
+ 411   3                              tt4=0;
+ 412   3                              ttt=0;
+ 413   3                              ttp=0;
+ 414   3                              ghdo=40;      ghxanh=36;        ghvang=3;
+ 415   3                              dotrai=ghdo;  xanhtrai=ghxanh;   vangtrai=ghvang;
+ 416   3                              dophai=ghdo;  xanhphai=ghxanh;   vangphai=ghvang;
+ 417   3                      }       
+ 418   2              }
+ 419   1              else if(gio<22)
+ 420   1              {       
+ 421   2                      tt1=tt2=tt3=tt4=1;
+ 422   2                      tt_dv=1;
+ 423   2                      if(tt5==1)
+ 424   2                      {
+ 425   3                              tt5=0;
+ 426   3                              ttt=0;
+ 427   3                              ttp=0;
+C51 COMPILER V9.01   MACH_DEN_GIAO_THONG_DS1307_AT89S52                                    09/14/2021 23:55:10 PAGE 8   
+
+ 428   3                              ghdo=20;      ghxanh=16;        ghvang=3;
+ 429   3                              dotrai=ghdo;  xanhtrai=ghxanh;   vangtrai=ghvang;
+ 430   3                              dophai=ghdo;  xanhphai=ghxanh;   vangphai=ghvang;
+ 431   3                      }       
+ 432   2              }
+ 433   1              else 
+ 434   1              {
+ 435   2                      tt_dv=0;
+ 436   2                      tt1=tt2=tt3=tt4=tt5=1;
+ 437   2              }
+ 438   1      }
+ 439          
+ 440          void main()
+ 441          {
+ 442   1              TMOD = T0_M0_;      TR0=1;      EA = 1;         ET0=1;
+ 443   1              TL0=0xb0;
+ 444   1              TH0=0x3c;
+ 445   1              
+ 446   1              ghdo=20;      ghxanh=16;        ghvang=3;
+ 447   1              ttt=0;
+ 448   1              ttp=0;
+ 449   1              dotrai=ghdo;  xanhtrai=ghxanh;   vangtrai=ghvang;
+ 450   1              dophai=ghdo;  xanhphai=ghxanh;   vangphai=ghvang;
+ 451   1              
+ 452   1              tt_mod=0;
+ 453   1              tt_dv=1;
+ 454   1      
+ 455   1              dp=1;
+ 456   1              vp=1;
+ 457   1              xp=1;
+ 458   1      
+ 459   1              dt=1;
+ 460   1              vt=1;
+ 461   1              xt=1;
+ 462   1              tt1=tt2=tt3=tt4=tt5=1;
+ 463   1      
+ 464   1          //write_to_ds13();
+ 465   1         while(1)
+ 466   1         {   
+ 467   2            if(bdn<20)
+ 468   2            {
+ 469   3               hienthi();
+ 470   3      
+ 471   3                       phim_mod();
+ 472   3                   phim_tang();
+ 473   3                   phim_giam();
+ 474   3                       
+ 475   3                       if(tt_mod==0)          kiem_tra();
+ 476   3                       else                           giaima_thoigian();
+ 477   3                       if((tt_dv==0)&&(tt_mod==0))            nhay_den_vang();   
+ 478   3            }
+ 479   2            else
+ 480   2            {
+ 481   3               bdn=0;
+ 482   3                       if((tt_mod==0)&&(tt_dv==1))
+ 483   3                       {
+ 484   4                              dem_ben_trai();   //dem led ben trai
+ 485   4                      dem_ben_phai();   //dem led ben phai
+ 486   4                                      
+ 487   4                       }
+ 488   3                       if(tt_mod==0)    read_ds13();
+ 489   3            }
+C51 COMPILER V9.01   MACH_DEN_GIAO_THONG_DS1307_AT89S52                                    09/14/2021 23:55:10 PAGE 9   
+
+ 490   2         }
+ 491   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1712    ----
+   CONSTANT SIZE    =   ----    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =     34    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =      6       1
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

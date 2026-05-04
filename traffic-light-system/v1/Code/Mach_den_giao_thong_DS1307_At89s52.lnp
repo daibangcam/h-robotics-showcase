@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"Mach_den_giao_thong_DS1307_At89s52.obj" 
+TO "Mach_den_giao_thong_DS1307_At89s52" 
+RAMSIZE(256) 

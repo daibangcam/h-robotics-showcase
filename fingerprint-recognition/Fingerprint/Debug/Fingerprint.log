@@ -1,0 +1,23 @@
+﻿Build started 5/20/2017 11:13:59 PM.
+     1>Project "C:\Users\daiba\Desktop\Fingerprint\Fingerprint\Fingerprint.vcxproj" on node 2 (Build target(s)).
+     1>ClCompile:
+         C:\Program Files (x86)\Microsoft Visual Studio 12.0\VC\bin\CL.exe /c /ZI /nologo /W3 /WX- /Od /Oy- /D WIN32 /D _DEBUG /D _CONSOLE /D _LIB /D _UNICODE /D UNICODE /Gm /EHsc /RTC1 /MDd /GS /fp:precise /Zc:wchar_t /Zc:forScope /Fo"Debug\\" /Fd"Debug\vc120.pdb" /Gd /TP /analyze- /errorReport:prompt lib\binarisation\AdaptiveLocalThreshold.cpp lib\extraction\CrossingNumber.cpp lib\extraction\Minutiae.cpp lib\optimisation\Ideka.cpp lib\thinning\GuoHall.cpp lib\thinning\ZhangSuen.cpp Source.cpp
+         Source.cpp
+     1>c:\users\daiba\desktop\fingerprint\fingerprint\source.cpp(1): fatal error C1083: Cannot open include file: 'opencv2/core/core.hpp': No such file or directory
+         ZhangSuen.cpp
+     1>c:\users\daiba\desktop\fingerprint\fingerprint\lib\thinning\zhangsuen.cpp(1): fatal error C1083: Cannot open include file: 'opencv2/imgproc/imgproc.hpp': No such file or directory
+         GuoHall.cpp
+     1>c:\users\daiba\desktop\fingerprint\fingerprint\lib\thinning\guohall.h(4): fatal error C1083: Cannot open include file: 'opencv2/imgproc/imgproc.hpp': No such file or directory
+         Ideka.cpp
+     1>c:\users\daiba\desktop\fingerprint\fingerprint\lib\optimisation\ideka.h(4): fatal error C1083: Cannot open include file: 'opencv2/imgproc/imgproc.hpp': No such file or directory
+         Minutiae.cpp
+         CrossingNumber.cpp
+     1>c:\users\daiba\desktop\fingerprint\fingerprint\lib\extraction\crossingnumber.h(4): fatal error C1083: Cannot open include file: 'opencv2/imgproc/imgproc.hpp': No such file or directory
+         AdaptiveLocalThreshold.cpp
+     1>c:\users\daiba\desktop\fingerprint\fingerprint\lib\binarisation\adaptivelocalthreshold.h(4): fatal error C1083: Cannot open include file: 'opencv2/imgproc/imgproc.hpp': No such file or directory
+         Generating Code...
+     1>Done Building Project "C:\Users\daiba\Desktop\Fingerprint\Fingerprint\Fingerprint.vcxproj" (Build target(s)) -- FAILED.
+
+Build FAILED.
+
+Time Elapsed 00:00:01.82
